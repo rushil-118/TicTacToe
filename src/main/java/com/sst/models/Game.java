@@ -111,7 +111,7 @@ public class Game {
     }
 
     public void setWinner(Player winner) {
-        winner = winner;
+        this.winner = winner;
     }
 
     public GameState getGameState() {
