@@ -1,13 +1,17 @@
 package com.sst.models;
 
 public class Symbol {
-    private char symbol;
+    private char symbolChar;
 
-    public char getSymbol() {
-        return symbol;
+    public Symbol(char symbolChar){
+        this.symbolChar = symbolChar;
     }
 
-    public void setSymbol(char symbol) {
-        this.symbol = symbol;
+    public char getSymbolChar() {
+        return symbolChar;
+    }
+
+    public void setSymbolChar(char symbolChar) {
+        this.symbolChar = symbolChar;
     }
 }
