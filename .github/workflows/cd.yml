@@ -1,0 +1,42 @@
+name: CD Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ---------------- Create Kubernetes Cluster ----------------
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.10.0
+
+      # ---------------- Set kubectl ----------------
+      - name: Set kubectl context
+        run: kubectl cluster-info
+
+      # ---------------- Create Deployment ----------------
+      - name: Deploy application to Kubernetes
+        run: |
+          kubectl create deployment tictactoe --image=rushil118/tictactoe:latest || true
+          kubectl set image deployment/tictactoe tictactoe=rushil118/tictactoe:latest
+          kubectl expose deployment tictactoe --type=ClusterIP --port=8080 || true
+
+      # ---------------- Verify Deployment ----------------
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/tictactoe
+
+      # ---------------- Check Pods ----------------
+      - name: Get pods
+        run: kubectl get pods
+
+      # ---------------- Smoke Test ----------------
+      - name: Describe deployment
+        run: kubectl describe deployment tictactoe
