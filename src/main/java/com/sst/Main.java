@@ -1,35 +1,40 @@
 package com.sst;
 
-import com.sst.controllers.GameController;
-import com.sst.exceptions.invalidMoveException;
-import com.sst.exceptions.sameSymbolException;
-import com.sst.models.*;
+import com.sst.engine.GameEngine;
 
-import java.util.List;
+import java.util.Scanner;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) throws sameSymbolException, invalidMoveException {
-        GameController gameController = new GameController();
-        int dimension = 3;
-        List<Player> players = List.of(
-                new Player("Demo", new Symbol('X'), PlayerType.HUMAN),
-                new Bot("Bot", new Symbol('O'), PlayerType.BOT, BotDifficultyLevel.EASY)
-        );
-        Game game = gameController.startGame(dimension,players);
-//        gameController.printBoard(game);
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int size = 3;
+        System.out.println("Welcome to TicTacToe!");
+        GameEngine game = new GameEngine(size);
 
-        while ((game.getGameState().equals(GameState.InProgress))){
-            gameController.printBoard(game);
-            gameController.makeMove(game);
+        while (game.getState() == GameEngine.State.IN_PROGRESS) {
+            printBoard(game.getBoard());
+            System.out.println("Player " + game.getCurrentPlayer() + ", enter row and col (0-based):");
+            int row = scanner.nextInt();
+            int col = scanner.nextInt();
+            if (!game.makeMove(row, col)) {
+                System.out.println("Cell already taken, try again.");
+            }
         }
-        gameController.printBoard(game);
-        if(gameController.checkState(game).equals(GameState.ENDED)){
-            System.out.println("The winner is " + gameController.getWinner(game).getName());
-        }else{
-            System.out.println("It is a Draw");
+        printBoard(game.getBoard());
+        if (game.getState() == GameEngine.State.WIN) {
+            System.out.println("Player " + game.getWinner() + " wins!");
+        } else {
+            System.out.println("It's a draw!");
         }
+        scanner.close();
+    }
 
+    private static void printBoard(char[][] board) {
+        for (char[] row : board) {
+            for (char c : row) {
+                System.out.print((c == ' ' ? '.' : c) + " ");
+            }
+            System.out.println();
+        }
     }
 }
