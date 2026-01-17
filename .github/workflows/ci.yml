@@ -25,17 +25,19 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Build, Lint, Test
-        run: mvn clean verify
-
-      # ---------------- SAST ----------------
+      
+      # ---------------- SAST (CodeQL) ----------------
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: java
 
+      - name: Build with Maven (instrumented for CodeQL)
+        run: mvn clean verify
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+
 
       # ---------------- SCA ----------------
       - name: Dependency vulnerability scan
