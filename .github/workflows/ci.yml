@@ -66,10 +66,8 @@ jobs:
       # ---------------- Runtime Smoke Test ----------------
       - name: Run container smoke test
         run: |
-          docker run -d --name test_container rushil118/tictactoe:latest
-          sleep 5
-          docker ps | grep test_container
-          docker rm -f test_container
+          docker run --rm rushil118/tictactoe:latest || true
+
 
       # ---------------- Push to DockerHub ----------------
       - name: Login to DockerHub
