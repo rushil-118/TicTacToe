@@ -1,42 +1,54 @@
-name: CD Pipeline
+name: CD - Deploy to Kubernetes (KIND)
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [ "main", "master" ]
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
 
 jobs:
   deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # ---------------- Create Kubernetes Cluster ----------------
-      - name: Create kind cluster
-        uses: helm/kind-action@v1.10.0
+      # 1. Install kubectl
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.29.0'
 
-      # ---------------- Set kubectl ----------------
-      - name: Set kubectl context
-        run: kubectl cluster-info
-
-      # ---------------- Create Deployment ----------------
-      - name: Deploy application to Kubernetes
+      # 2. Install KIND
+      - name: Install KIND
         run: |
-          kubectl create deployment tictactoe --image=rushil118/tictactoe:latest || true
-          kubectl set image deployment/tictactoe tictactoe=rushil118/tictactoe:latest
-          kubectl expose deployment tictactoe --type=ClusterIP --port=8080 || true
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+          chmod +x kind
+          sudo mv kind /usr/local/bin/kind
 
-      # ---------------- Verify Deployment ----------------
-      - name: Wait for rollout
+      # 3. Create KIND cluster
+      - name: Create KIND Cluster
         run: |
-          kubectl rollout status deployment/tictactoe
+          kind create cluster --name devops-cluster
 
-      # ---------------- Check Pods ----------------
-      - name: Get pods
-        run: kubectl get pods
+      # 4. Deploy to Kubernetes
+      - name: Deploy Application
+        run: |
+          kubectl apply -f k8s/deployment.yml
 
-      # ---------------- Smoke Test ----------------
-      - name: Describe deployment
-        run: kubectl describe deployment tictactoe
+      # 5. Wait for pods to start
+      - name: Wait for Pods
+        run: sleep 30
+
+      # 6. Get Pods
+      - name: Get Pods
+        run: |
+          kubectl get pods
+
+      # 7. Show Logs
+      - name: Show Pod Logs
+        run: |
+          POD=$(kubectl get pods -l app=tictactoe -o jsonpath="{.items[0].metadata.name}")
+          kubectl logs $POD || true

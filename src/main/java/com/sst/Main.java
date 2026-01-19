@@ -6,6 +6,18 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        
+        if (args.length > 0 && args[0].equalsIgnoreCase("--server")) {
+            System.out.println("Starting TicTacToe in SERVER mode...");
+            while (true) {
+                try {
+                    Thread.sleep(60000); // sleep forever
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         Scanner scanner = new Scanner(System.in);
         int size = 3;
         System.out.println("Welcome to TicTacToe!");
