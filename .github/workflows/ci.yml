@@ -67,7 +67,7 @@ jobs:
       - name: Run container smoke test
         run: |
           echo "Starting container for smoke test..."
-          docker run -d --name smoke-test $IMAGE
+          docker run -d --name smoke-test rushil118/tictactoe:latest
           sleep 5
           docker logs smoke-test
           docker stop smoke-test
